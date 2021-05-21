@@ -20,7 +20,7 @@ The objective of this project is to implement functionally a collection of image
 
 # How to produce an image
 
-Open the image.js file in the src directory. Uncomment a generators or a filters between line 35 and line 884. Write the variable name or the chosen generator / filter as input of the function "generators.generate(...)" line 907. Then go to the root of the project directory and run
+Open the image.js file in the src directory. Delete all "/*...*/" comments between line 25 and 627. Choose a generator and / or filters and choose a template to compute the image. Then go to the root of the project directory and run
 
 ```shell
 $ make exe
