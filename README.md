@@ -20,7 +20,7 @@ The objective of this project is to implement functionally a collection of image
 
 # How to produce an image
 
-Open the image.js file in the src directory. Delete all "/*...*/" comments between line 25 and 627. Choose a generator and / or filters and choose a template to compute the image. Then go to the root of the project directory and run
+Open the image.js file in the src directory. Delete all "/*...*/" comments between line 25 and 629. Choose a generator and / or filters and choose a template to compute the image. Then go to the root of the project directory and run
 
 ```shell
 $ make exe
