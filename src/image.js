@@ -8,16 +8,8 @@ function imageGeneration(canvas, width, height, getPixelColor) {
     let image = context.createImageData(width, height);
 
     let n = 0; // Index inside the image array
-    // const percentageGeneratedByOnePixel = ((1 / (height * width)) * 100);
-    // let progress = 0;
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++, n += 4) {
-            // progress += percentageGeneratedByOnePixel;
-            // if (progress.toFixed(2) % 2.5 === 0) {
-                // process.stdout.clearLine();
-                // process.stdout.cursorTo(0);
-                // process.stdout.write(`Generating Image: ${progress.toFixed(2)}%`);
-            // }
             const pixelColor = getPixelColor(x, y);
             image.data[n] = pixelColor.red;
             image.data[n + 1] = pixelColor.green;
@@ -25,7 +17,6 @@ function imageGeneration(canvas, width, height, getPixelColor) {
             image.data[n + 3] = pixelColor.alpha;
         }
     }
-    // process.stdout.write(`\n`);
     context.putImageData(image, 0, 0);
     return canvas;
 }
@@ -168,93 +159,32 @@ function getImage(canvas, width, height) {
         }
     };
 
-    /*
-    const asteroid = {
-        src: {
-            img: generators.colorMap.colorMap,
-            options: {
-                f: generators.colorMap.predicate.focused(
-                    (x, y) => {
-                        if (Math.sqrt(x ** 2 + y ** 2) < 25){
-                            return x ** 2 + y ** 2;
-                        }
-                        return 25 ** 2;
-                    },
-                    height, width, -150, 100, -100, 150),
-                min: 0,
-                max: 25 ** 2,
-                redVariations:[[255, 20], [20, 0]],
-                greenVariations:[[255, 20], [20, 0]],
-                blueVariations:[[255, 20], [20, 0]],
-                alphaVariations:[[255], [0]]
-            },
-            filters: {
-                1: {
-                    filter: filters.bulge,
-                    filter_options: {
-                        size: {
-                            width: width,
-                            height: height
-                        },
-                        coef: 0.5
-                    }
-                }
-            }
-        },
-        linker: {
-            composition: filters.composition.multiply,
-        },
-        dst: {
-            src: {
-                img: generators.colorMap.colorMap,
-                options: {
-                    f: generators.noiseGenerator(
-                        {
-                            noise: generators.noise.noiseFractals.warp,
-                            noiseOptions: {
-                                width: width,
-                                height: height,
-                                fractalGen: {
-                                    fractal: 'turbulence',
-                                    fractalOptions: {
-                                        noiseGen: "perlin",
-                                        noiseSeed: 1339,
-                                        argsList: {
-                                            variant: "simplex",
-                                            scale: 8
-                                        },
-                                        octaves: 4,
-                                        initial_frequency: 0.5,
-                                        initial_amplitude: 3,
-                                        lacunarity: 2,
-                                        frequency: 0.7
-                                    }
-                                },
-                                qMultiplier: 75,
-                                rMultiplier: 75,
-                                colored: false,
-                                get_noise: true
-                            }
-                        }
-                    ),
-                    min: 1,
-                    max: -1,
-                    redVariations: [[0], [0], [0], [0], [0, 255], [255]],
-                    greenVariations: [[0], [0], [0], [0], [0, 255], [255]],
-                    blueVariations: [[0], [0], [0], [0], [0, 255], [255]],
-                    alphaVariations: [[255]]
-                }
-            }
-        }
-    };
-    */
 
     ////////////////////////////////////////////////////
     ///////////////////// FILTERS //////////////////////
     ////////////////////////////////////////////////////
 
-    /*
+    //// Shortcut to filters functions in the JSON representation ////
+    //// For example, mirror has to be called as :               ////
+    //// mirror(options of the filter)(index determining the      ////
+    //// order to apply filters)(other_filters function)           ////
     const mirror = generators.filtersDescriptorHelper(filters.mirror);
+    const clear = generators.filtersDescriptorHelper(filters.clear);
+    const bulge = generators.filtersDescriptorHelper(filters.bulge);
+    const setOpacity = generators.filtersDescriptorHelper(filters.setOpacity);
+    const transform = generators.filtersDescriptorHelper(filters.transform);
+    const limit = generators.filtersDescriptorHelper(filters.limit);
+    const pixelate = generators.filtersDescriptorHelper(filters.pixelate);
+    const negative = generators.filtersDescriptorHelper(filters.negative)();
+    const changeRGBAColor = generators.filtersDescriptorHelper(filters.changeRGBAColor);
+    const repeat = generators.filtersDescriptorHelper(filters.repeat);
+    const anaglyphe = generators.filtersDescriptorHelper(filters.anaglyphe);
+    const gaussianBlur = generators.filtersDescriptorHelper(filters.gaussianBlur);
+    const blackWhite = generators.filtersDescriptorHelper(filters.blackWhite)();
+
+    ///////////// Filters with pre-defined options /////////////
+    ///////// Example : xMirror(index)(other_filters) //////////
+
     const xMirror = mirror({
         axe: 'x',
         width: width,
@@ -270,15 +200,11 @@ function getImage(canvas, width, height) {
         width: width,
         height: height
     });
-
-
-    const clear = generators.filtersDescriptorHelper(filters.clear);
+    
     const clearInCircle = clear({
         toClear: (x, y) => Math.sqrt((x - 125) ** 2 + (y - 125) ** 2) > 100
     });
 
-
-    const bulge = generators.filtersDescriptorHelper(filters.bulge);
     const bulgeBump = bulge({
         size: {
             width : width,
@@ -290,7 +216,6 @@ function getImage(canvas, width, height) {
         },
         coef: 1
     });
-
     const bulgeVanishingPoint = bulge({
         size: {
             width : width,
@@ -302,7 +227,6 @@ function getImage(canvas, width, height) {
         },
         coef: -1
     });
-
     const bulgeHole = bulge({
         size: {
             width : width,
@@ -315,8 +239,6 @@ function getImage(canvas, width, height) {
         coef: -0.5
     });
 
-
-    const setOpacity = generators.filtersDescriptorHelper(filters.setOpacity);
     const halfOpacity = setOpacity({
         coef: 0.5
     });
@@ -324,8 +246,6 @@ function getImage(canvas, width, height) {
         opacity: 100
     });
 
-
-    const transform = generators.filtersDescriptorHelper(filters.transform);
     const translateRotateScale = transform({
         size: {
             width: width,
@@ -342,8 +262,6 @@ function getImage(canvas, width, height) {
         angle: 42
     });
 
-
-    const limit = generators.filtersDescriptorHelper(filters.limit);
     const window = limit({
         xlim: {
             min: 42,
@@ -355,8 +273,6 @@ function getImage(canvas, width, height) {
         }
     });
 
-
-    const pixelate = generators.filtersDescriptorHelper(filters.pixelate);
     const bigPixel = pixelate({
         size: {
             x: 5,
@@ -364,20 +280,10 @@ function getImage(canvas, width, height) {
         }
     });
 
-
-    const negative = generators.filtersDescriptorHelper(filters.negative)();
-
-
-    const changeRGBAColor = generators.filtersDescriptorHelper(filters.changeRGBAColor);
     const redMax = changeRGBAColor({
         red: 255
     });
 
-
-    const blackWhite = generators.filtersDescriptorHelper(filters.blackWhite)();
-
-
-    const repeat = generators.filtersDescriptorHelper(filters.repeat);
     const smallRepeat = repeat({
         width: width,
         height: height,
@@ -387,25 +293,23 @@ function getImage(canvas, width, height) {
         }
     });
 
-
-    const anaglyphe = generators.filtersDescriptorHelper(filters.anaglyphe);
     const effect3D = anaglyphe({
         dx: 3,
         dy: 2
     });
-
 
     const kernel = filters.createKernel(
         {
             kernelSize : 3,
             sigma : 1.5
         });
-    const gaussianBlur = generators.filtersDescriptorHelper(filters.gaussianBlur);
     const blur = gaussianBlur({
         kernel : kernel,
         kernelSize : 3
     });
 
+
+    ///////////// Composition filters /////////////
     const xor = filters.composition.xor;
     const over = filters.composition.over;
     const add = filters.composition.add;
@@ -422,9 +326,12 @@ function getImage(canvas, width, height) {
     ///////////////// NOISE Generators /////////////////
     ////////////////////////////////////////////////////
 
-
+    //// Shortcut to noise generator functions in the JSON representation /////
+    //// to use like noise(options)()                                     /////
     const noise = generators.imageDescriptorHelper(generators.noiseGenerator);
 
+    ///////////// Noise generators with pre-defined options /////////////
+    ////////////// Example : xMirror(index)(other_filters) //////////////
 
     ///////////////// Perlin Noise /////////////////////
 
@@ -438,7 +345,6 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
     const valueNoise = noise({
         noise: generators.noise.noiseGenerators.perlinNoise,
         noiseOptions: {
@@ -448,7 +354,6 @@ function getImage(canvas, width, height) {
             variant: 'value'
         }
     })();
-
 
     const gradientNoise = noise({
         noise: generators.noise.noiseGenerators.perlinNoise,
@@ -461,7 +366,6 @@ function getImage(canvas, width, height) {
     })();
 
     ///////////////// Fractal Brownian Motion //////////
-
 
     const fractalFbmPerlinSimplexColored = noise({
         noise: generators.noise.noiseFractals.fractal,
@@ -485,7 +389,6 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
     const fractalFbmWorley = noise({
         noise: generators.noise.noiseFractals.fractal,
         noiseOptions: {
@@ -505,9 +408,7 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
-    // Turbulence Noise
-
+    ///////////////// Turbulence Noise /////////////////
 
     const fractalTurbulencePerlin = noise({
         noise: generators.noise.noiseFractals.fractal,
@@ -526,7 +427,6 @@ function getImage(canvas, width, height) {
             }
         }
     })();
-
 
     const fractalTurbulenceWorley = noise({
         noise: generators.noise.noiseFractals.fractal,
@@ -547,9 +447,7 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
-    // Ridged Multifractal Noise
-
+    ///////////////// Ridged Multifractal Noise /////////////////
 
     const fractalRidgedPerlinColored = noise({
         noise: generators.noise.noiseFractals.fractal,
@@ -574,7 +472,6 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
     const fractalRidgedWorleyColored = noise({
         noise: generators.noise.noiseFractals.fractal,
         noiseOptions: {
@@ -595,9 +492,7 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
-    // Worley Noise
-
+    ///////////////// Worley Noise /////////////////
 
     const cellularWorleyNoise = noise({
         noise: generators.noise.noiseGenerators.worleyNoise,
@@ -612,9 +507,7 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
-    // Domain Warping
-
+    ///////////////// Domain Warping /////////////////
 
     const fractalDomainWarpingRidgedWorley = noise({
         noise: generators.noise.noiseFractals.warp,
@@ -640,7 +533,6 @@ function getImage(canvas, width, height) {
         }
     })();
 
-
     const fractalDomainWarpingTurbulencePerlin = noise({
         noise: generators.noise.noiseFractals.warp,
         noiseOptions: {
@@ -665,79 +557,77 @@ function getImage(canvas, width, height) {
     //////////////// TILING Generators /////////////////
     ////////////////////////////////////////////////////
 
-    ////////////// Checkerboard
-
-
+    //// Shortcut to tiling generators functions in the JSON representation /////
+    //// to use like aTiling(options)()                                     /////
     const solidColor = generators.imageDescriptorHelper(generators.tilings.solid);
+    const checkerboard = generators.imageDescriptorHelper(generators.tilings.checkerboard);
+    const rectangleTriangle = generators.imageDescriptorHelper(generators.tilings.rectangleTriangle);
+    const isocelesTriangle = generators.imageDescriptorHelper(generators.tilings.isoscelesTriangle);
+    const equilateralTriangle = generators.imageDescriptorHelper(generators.tilings.equilateralTriangle);
+    const zigzag = generators.imageDescriptorHelper(generators.tilings.zigzag);
+    const grid = generators.imageDescriptorHelper(generators.tilings.grid);
+    const doubleVichy = generators.imageDescriptorHelper(generators.tilings.doubleVichy);
+    const hourglass = generators.imageDescriptorHelper(generators.tilings.hourglass);
+    const octagonal = generators.imageDescriptorHelper(generators.tilings.octagonal);
+    const grandmaTexture = generators.imageDescriptorHelper(generators.tilings.grandmaTexture);
+    const beePattern = generators.imageDescriptorHelper(generators.tilings.beePattern);
+    const voronoiHexagonal = generators.imageDescriptorHelper(generators.tilings.voronoiHexagonal);
+    const voronoiRandom = generators.imageDescriptorHelper(generators.tilings.voronoiRandom);
+    const voronoiPentagonal = generators.imageDescriptorHelper(generators.tilings.voronoiPentagonal);
+
+    ///////////// Tiling generators with pre-defined options //////////
+    /////////////////////// Example : solidColor /////////////////////
     const indigo = solidColor({color: colors.examples.INDIGO})();
     const blue = solidColor({color: colors.examples.BLUE})();
 
-
-    const checkerboard = generators.imageDescriptorHelper(generators.tilings.checkerboard);
     const chessBoard = checkerboard({
         pixelPerCase: width / 5,
         color1: colors.examples.WHITE,
         color2: colors.examples.BLACK,
     })();
 
-
-    const rectangleTriangle = generators.imageDescriptorHelper(generators.tilings.rectangleTriangle);
     const rectangleTriangleIndigoBlue = rectangleTriangle({
         size: width / 5,
         color1: colors.examples.INDIGO,
         color2: colors.examples.BLUE
     })();
 
-
-    const isocelesTriangle = generators.imageDescriptorHelper(generators.tilings.isoscelesTriangle);
     const isocelesTriangleRedVerdigri = isocelesTriangle({
         size: width / 5,
         color1: colors.examples.RED,
         color2: colors.examples.VERDIGRI
     })();
 
-
-    const equilateralTriangle = generators.imageDescriptorHelper(generators.tilings.equilateralTriangle);
     const equilateralTriangleRedGreen = equilateralTriangle({
         size: width / 5,
         color1: colors.examples.RED,
         color2: colors.examples.GREEN
     })();
 
-
-    const zigzag = generators.imageDescriptorHelper(generators.tilings.zigzag);
     const zigzagRedGreen = zigzag({
         size: width / 5,
         color1: colors.examples.RED,
         color2: colors.examples.GREEN
     })();
 
-
-    const grid = generators.imageDescriptorHelper(generators.tilings.grid);
     const gridBlackGreen = grid({
         size: width / 5,
         color1: colors.examples.BLACK,
         color2: colors.examples.GREEN
     })();
 
-
-    const doubleVichy = generators.imageDescriptorHelper(generators.tilings.doubleVichy);
     const doubleVichyBlackGreen = doubleVichy({
         size: 7,
         color1: colors.examples.BLACK,
         color2: colors.examples.GREEN
     })();
 
-
-    const hourglass = generators.imageDescriptorHelper(generators.tilings.hourglass);
     const hourglassBlackWhite = hourglass({
         size: 50,
         color1: colors.examples.BLACK,
         color2: colors.examples.WHITE
     })();
 
-
-    const octagonal = generators.imageDescriptorHelper(generators.tilings.octagonal);
     const octagonalRedBlack = octagonal({
         size: 50,
         width: 1,
@@ -745,8 +635,6 @@ function getImage(canvas, width, height) {
         color2: colors.examples.BLACK
     })();
 
-
-    const grandmaTexture = generators.imageDescriptorHelper(generators.tilings.grandmaTexture);
     const grandmaTexturePurpleBlack = grandmaTexture({
         size1: 7,
         size2: 10,
@@ -755,23 +643,17 @@ function getImage(canvas, width, height) {
         color2: colors.examples.BLACK
     })();
 
-
-    const beePattern = generators.imageDescriptorHelper(generators.tilings.beePattern);
     const beePatternYellowBlack = beePattern({
         color1: colors.examples.YELLOW,
         color2: colors.examples.BLACK
     })();
 
-
-    const voronoiHexagonal = generators.imageDescriptorHelper(generators.tilings.voronoiHexagonal);
     const voronoiHex = voronoiHexagonal({
         height: height,
         width: width,
         size: 20
     })();
 
-
-    const voronoiRandom = generators.imageDescriptorHelper(generators.tilings.voronoiRandom);
     const voronoiRng = voronoiRandom({
         height: height,
         width: width,
@@ -779,8 +661,6 @@ function getImage(canvas, width, height) {
         number: 42
     })();
 
-
-    const voronoiPentagonal = generators.imageDescriptorHelper(generators.tilings.voronoiPentagonal);
     const voronoiPenta = voronoiPentagonal({
         height: height,
         width: width,
@@ -791,121 +671,155 @@ function getImage(canvas, width, height) {
     /////////////// COLORMAPS Generators ///////////////
     ////////////////////////////////////////////////////
 
+    //// Shortcut to colorMap generators functions in the JSON representation /////
+    //// to use like aColorMap(options)()                                     /////
     const colorMapHot = generators.imageDescriptorHelper(generators.colorMap.examples.hot);
+    const colorMapHsl = generators.imageDescriptorHelper(generators.colorMap.examples.hsl);
+    const colorMapJet = generators.imageDescriptorHelper(generators.colorMap.examples.jet);
+    const colorMapSnow = generators.imageDescriptorHelper(generators.colorMap.examples.snow);
+    const colorMapGreys = generators.imageDescriptorHelper(generators.colorMap.examples.greys);
+    const colorMapIsland = generators.imageDescriptorHelper(generators.colorMap.examples.island);
+    const colorMapIslandD = generators.imageDescriptorHelper(generators.colorMap.examples.islandD);
+    const colorMapLight = generators.imageDescriptorHelper(generators.colorMap.examples.light);
+    const colorMapMushroom = generators.imageDescriptorHelper(generators.colorMap.examples.mushroom);
+    const colorMapPurple = generators.imageDescriptorHelper(generators.colorMap.examples.purple);
+    const colorMapSpring = generators.imageDescriptorHelper(generators.colorMap.examples.spring);
+    
+    // Shortcut to some colorMap predicate function
+    const focus = generators.colorMap.predicate.focused;
+    const mandelBrotSet = generators.colorMap.predicate.mandelbrotSet;
+
+    ///////////// ColorMap Generator with pre-defined options /////////////
+    ///////////////////////// Example : hotWave //////////////////////////
+
     const hotWave = colorMapHot({
         f: generators.colorMap.predicate.wave,
         min: -50,
         max: 50
     })();
 
-
-    const focus = generators.colorMap.predicate.focused;
-
-
-    const colorMapHsl = generators.imageDescriptorHelper(generators.colorMap.examples.hsl);
     const hslSplash = colorMapHsl({
         f: focus(generators.colorMap.predicate.splash, height, width, -1, 1, -1, 1),
         min: -0.001,
         max: 0.001
     })();
 
-
-    const colorMapJet = generators.imageDescriptorHelper(generators.colorMap.examples.jet);
     const jetPic = colorMapJet({
         f: focus(generators.colorMap.predicate.pic, height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-    const mandelBrotSet = generators.colorMap.predicate.mandelbrotSet;
-
-    const colorMapSnow = generators.imageDescriptorHelper(generators.colorMap.examples.snow);
     const snowMandelBrot = colorMapSnow({
         f: focus(mandelBrotSet(10, 4), height, width, -2, 1, -1.5, 1.5),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapGreys = generators.imageDescriptorHelper(generators.colorMap.examples.greys);
     const greysMandelBrot = colorMapGreys({
         f: focus(mandelBrotSet(10, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapIsland = generators.imageDescriptorHelper(generators.colorMap.examples.island);
     const islandJuliaDragon = colorMapIsland({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaDragon(25, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapIslandD = generators.imageDescriptorHelper(generators.colorMap.examples.islandD);
     const islandDJuliaElec = colorMapIslandD({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaElec(10, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapLight = generators.imageDescriptorHelper(generators.colorMap.examples.light);
     const lightJuliaBubble = colorMapLight({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaBubble(25, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapMushroom = generators.imageDescriptorHelper(generators.colorMap.examples.mushroom);
     const mushroomJuliaCrown = colorMapMushroom({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaCrown(25, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapPurple = generators.imageDescriptorHelper(generators.colorMap.examples.purple);
     const purpleJuliaSpi = colorMapPurple({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaSpi(25, 2), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
-
-    const colorMapSpring = generators.imageDescriptorHelper(generators.colorMap.examples.spring);
     const springJuliaPeak = colorMapSpring({
         f: focus(generators.colorMap.predicate.juliaShapes.juliaPeak(7, 3), height, width, -1, 1, -1, 1),
         min: -1,
         max: 1
     })();
 
+    ////////////////////////////////////////////////////
+    ///////////////// IMAGE GENERATION /////////////////
+    ////////////////////////////////////////////////////
 
-    pixel = generators.generate({
+    /*
+    // Template
+    const pixel = generators.generate({
+        src: {
+            ...snowMandelBrot,
+            filters: {}
+        },
+        linker: {
+            composition: divide
+        },
+        dst: {
+            src: {
+                ...voronoiPenta,
+                filters: {}
+            }
+        },
+        filters: {}
+    });
+    */
+
+    // 3 different example of using generate and JSON format 
+    // need only one to be uncommented
+
+    /* 
+    // Simple example of composition
+    const pixel = generators.generate({
         src: snowMandelBrot,
         linker: {
-            composition: screen
+            composition: divide
         },
         dst: {
             src: voronoiPenta
+        },
+        filters: {
+
         }
     });
+    */
 
-    pixel = generators.generate({
+    /* 
+    // Simple example of a image with filters
+    const pixel = generators.generate({
        src: {
-           ...simplexNoise,
+           ...cellularWorleyNoise,
            filters: {
-               ...effect3D(1)(
-                   smallRepeat(2)()
+               ...negative(1)(
+                   redMax(2)()
                )
            }
        }
     });
     */
+   
 
-    const pixel = generators.generate(starsXplanet);
+    // Simple generator
+    const pixel = generators.generate({
+        src: greysMandelBrot
+    });
 
     return imageGeneration(canvas, width, height, pixel);
 }
