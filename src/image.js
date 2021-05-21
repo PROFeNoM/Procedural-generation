@@ -38,7 +38,9 @@ function getImage(canvas, width, height) {
     const transform = generators.filtersDescriptorHelper(filters.transform);
     const limit = generators.filtersDescriptorHelper(filters.limit);
     const pixelate = generators.filtersDescriptorHelper(filters.pixelate);
+    */
     const negative = generators.filtersDescriptorHelper(filters.negative)();
+    /*
     const changeRGBAColor = generators.filtersDescriptorHelper(filters.changeRGBAColor);
     const repeat = generators.filtersDescriptorHelper(filters.repeat);
     const anaglyphe = generators.filtersDescriptorHelper(filters.anaglyphe);
@@ -685,7 +687,10 @@ function getImage(canvas, width, height) {
 
     // Simple generator
     const pixel = generators.generate({
-        src: indigo
+        src: indigo,
+        filters: {
+            ...negative(1)()
+        }
     });
 
     return imageGeneration(canvas, width, height, pixel);
