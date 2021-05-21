@@ -22,144 +22,7 @@ function imageGeneration(canvas, width, height, getPixelColor) {
 }
 
 function getImage(canvas, width, height) {
-
-    const planet = {
-        src: {
-            img: generators.colorMap.colorMap,
-            options: {
-                f: generators.colorMap.predicate.focused(
-                    (x, y) => {
-                        if (Math.sqrt(x ** 2 + y ** 2) < 75) {
-                            return x ** 2 + y ** 2;
-                        }
-                        return 75 ** 2;
-                    },
-                    height, width, -150, 150, -150, 150),
-                min: 0,
-                max: 75 ** 2,
-                redVariations: [[255, 20], [20, 0]],
-                greenVariations: [[255, 20], [20, 0]],
-                blueVariations: [[255, 20], [20, 0]],
-                alphaVariations: [[255], [0]]
-            },
-            filters: {
-                1: {
-                    filter: filters.bulge,
-                    filter_options: {
-                        size: {
-                            width: width,
-                            height: height
-                        },
-                        coef: 0.5
-                    }
-                }
-            }
-        },
-        linker: {
-            composition: filters.composition.multiply,
-        },
-        dst: {
-            src: {
-                img: generators.colorMap.examples.hot,
-                options: {
-                    f: generators.noiseGenerator(
-                        {
-                            noise: generators.noise.noiseFractals.fractal,
-                            noiseOptions: {
-                                width: width,
-                                height: height,
-                                fractal: 'fbm',
-                                fractalOptions: {
-                                    noiseGen: "perlin",
-                                    argsList: {
-                                        variant: "simplex",
-                                        scale: 12
-                                    },
-                                    octaves: 4,
-                                    persistence: 0.5,
-                                    lacunarity: 2,
-                                    initial_amplitude: 3,
-                                    initial_frequency: 0.3,
-                                    get_noise: true
-                                }
-                            }
-                        }
-                    ),
-                    min: -1,
-                    max: 1
-                }
-            }
-        }
-    };
-
-    const stars = {
-        src: {
-            img: generators.colorMap.colorMap,
-            options: {
-                f: generators.noiseGenerator(
-                    {
-                        noise: generators.noise.noiseFractals.warp,
-                        noiseOptions: {
-                            width: width,
-                            height: height,
-                            fractalGen: {
-                                fractal: 'turbulence',
-                                fractalOptions: {
-                                    noiseGen: "perlin",
-                                    noiseSeed: 1339,
-                                    argsList: {
-                                        variant: "simplex",
-                                        scale: 48
-                                    },
-                                    octaves: 4,
-                                    initial_frequency: 0.3,
-                                    initial_amplitude: 3,
-                                    lacunarity: 3,
-                                    frequency: 0.7
-                                }
-                            },
-                            qMultiplier: 100,
-                            rMultiplier: 100,
-                            colored: false,
-                            get_noise: true
-                        }
-                    }
-                ),
-                min: 1,
-                max: -1,
-                redVariations: [[0], [0], [0], [0], [0], [0], [0, 255], [255]],
-                greenVariations: [[0], [0], [0], [0], [0], [0], [0, 255], [255]],
-                blueVariations: [[0], [0], [0], [0], [0], [0], [0, 255], [255]],
-                alphaVariations: [[255]]
-            }
-        }
-    };
-
-    const starsXplanet = {
-        src: {
-            img: () => generators.generate(planet),
-        },
-        linker: {
-            composition: filters.composition.over
-        },
-        dst: {
-            src: {
-                img: () => generators.generate(stars)
-            }
-        },
-        filters: {
-            1: {
-                filter: filters.anaglyphe,
-                filter_options: {
-                    dx: 3,
-                    dy: 2,
-                    color: colors.examples.TRANSPARENT
-                }
-            }
-        }
-    };
-
-
+/*
     ////////////////////////////////////////////////////
     ///////////////////// FILTERS //////////////////////
     ////////////////////////////////////////////////////
@@ -559,7 +422,9 @@ function getImage(canvas, width, height) {
 
     //// Shortcut to tiling generators functions in the JSON representation /////
     //// to use like aTiling(options)()                                     /////
+    */
     const solidColor = generators.imageDescriptorHelper(generators.tilings.solid);
+    /*
     const checkerboard = generators.imageDescriptorHelper(generators.tilings.checkerboard);
     const rectangleTriangle = generators.imageDescriptorHelper(generators.tilings.rectangleTriangle);
     const isocelesTriangle = generators.imageDescriptorHelper(generators.tilings.isoscelesTriangle);
@@ -577,7 +442,9 @@ function getImage(canvas, width, height) {
 
     ///////////// Tiling generators with pre-defined options //////////
     /////////////////////// Example : solidColor /////////////////////
+    */
     const indigo = solidColor({color: colors.examples.INDIGO})();
+    /*
     const blue = solidColor({color: colors.examples.BLUE})();
 
     const chessBoard = checkerboard({
@@ -818,7 +685,7 @@ function getImage(canvas, width, height) {
 
     // Simple generator
     const pixel = generators.generate({
-        src: greysMandelBrot
+        src: indigo
     });
 
     return imageGeneration(canvas, width, height, pixel);
